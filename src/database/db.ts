@@ -1,5 +1,5 @@
 import { DataSource } from "typeorm";
-import { DB_NAME, DB_HOST, DB_USERNAME, DB_PASSWORD, DB_PORT } from '../Constants/config';
+import { DB_NAME, DB_HOST, DB_USERNAME, DB_PASSWORD, DB_PORT } from '../config';
 
 export const AppDataSource = new DataSource({
   type: "mysql",
