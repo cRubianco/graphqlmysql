@@ -5,3 +5,4 @@ dist
 
 # Archivos
 package-lock.json
+.env
