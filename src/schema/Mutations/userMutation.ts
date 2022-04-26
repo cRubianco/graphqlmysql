@@ -35,9 +35,37 @@ export const DELETE_USER = {
   args: {
     id: {type: GraphQLID},
   },
-  resolve(_: any, {id}: any) {
+  async resolve(_: any, {id}: any) {
     console.log(id);
-    return false;
-    
+    const result = await Users.delete(id);
+    console.log(result);
+    if (result.affected) {
+      return true;
+    } else {
+      return false;
+    }
   }
+};
+
+export const UPDATE_USER = {
+  type: GraphQLBoolean,
+  args: {
+    id: {type: GraphQLID},
+    name: {type: GraphQLString},
+    username: {type: GraphQLString},
+    password: {type: GraphQLString}
+  },
+  async resolve(_: any, {id, name, username, password}: any ) {
+    console.log(id, name, username, password);
+
+    const userFound = await Users.findOne(id);
+    console.log(userFound);
+    
+    if (userFound){
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 }
