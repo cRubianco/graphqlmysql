@@ -39,7 +39,7 @@ export const DELETE_USER = {
     console.log(id);
     const result = await Users.delete(id);
     console.log(result);
-    if (result.affected) {
+    if (result.affected === 1) {
       return true;
     } else {
       return false;
@@ -58,14 +58,11 @@ export const UPDATE_USER = {
   async resolve(_: any, {id, name, username, password}: any ) {
     console.log(id, name, username, password);
 
-    const userFound = await Users.findOne(id);
+    const userFound = await Users.findByIds(id);
     console.log(userFound);
     
-    if (userFound){
-      return true;
-    } else {
-      return false;
-    }
+    return false;
+
   }
 
-}
+};
