@@ -1,7 +1,7 @@
-import { GraphQLBoolean, GraphQLID, GraphQLString } from "graphql";
+import { GraphQLBoolean, GraphQLID, GraphQLObjectType, GraphQLString } from "graphql";
 import { Users } from "../../entities/users";
 import { UserType } from "../typeDefs/userType";
-import bcryptjs from "bcryptjs";
+import bcryptjs, { compare } from "bcryptjs";
 
 export const CREATE_USER = {
   // type: GraphQLString,
@@ -37,13 +37,11 @@ export const DELETE_USER = {
   },
   async resolve(_: any, {id}: any) {
     console.log(id);
-    const result = await Users.delete(id);
+    const result = await Users.delete({id});
     console.log(result);
-    if (result.affected === 1) {
-      return true;
-    } else {
-      return false;
-    }
+    if (result.affected! > 0) return true;
+    return false;
+    
   }
 };
 
@@ -53,15 +51,29 @@ export const UPDATE_USER = {
     id: {type: GraphQLID},
     name: {type: GraphQLString},
     username: {type: GraphQLString},
-    password: {type: GraphQLString}
+    oldPassword: {type: GraphQLString},
+    newPassword: {type: GraphQLString}
   },
-  async resolve(_: any, {id, name, username, password}: any ) {
-    console.log(id, name, username, password);
-
-    const userFound = await Users.findByIds(id);
-    console.log(userFound);
+  async resolve(_: any, {id, name, username, oldPassword, newPassword}: any ) {
+    console.log(id, name, username, oldPassword);
     
-    return false;
+    const userFound = await Users.findOneBy({ id });
+    if (!userFound) throw new Error("User not found");
+
+    // Compare old password with the new password
+    const isMatch = await compare(oldPassword, userFound?.password);
+
+    if (!isMatch) throw new Error("Passwords does not match");
+    
+    const encryptPassword = await bcryptjs.hash(newPassword, 10)
+
+    console.log("---->   ",userFound, "  isMatch : ", isMatch);
+   
+    const result = await Users.update({id}, {username, name, password: encryptPassword})
+    
+    if(result.affected === 0) return false;
+    
+    return true;
 
   }
 
