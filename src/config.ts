@@ -1,4 +1,6 @@
 
+export const PORT = process.env.PORT || 3000;
+
 export const DB_NAME = process.env.DB_NAME;
 export const DB_USERNAME = process.env.DB_USERNAME || "admin";
 export const DB_PASSWORD = process.env.DB_PASSWORD || "admin";
