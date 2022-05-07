@@ -1,4 +1,4 @@
-import { GraphQLBoolean, GraphQLID, GraphQLObjectType, GraphQLString } from "graphql";
+import { GraphQLBoolean, GraphQLID, GraphQLInputObjectType, GraphQLString } from "graphql";
 import { Users } from "../../entities/users";
 import { UserType } from "../typeDefs/userType";
 import bcryptjs, { compare } from "bcryptjs";
@@ -50,13 +50,20 @@ export const UPDATE_USER = {
   type: MessageType,
   args: {
     id: {type: GraphQLID},
-    name: {type: GraphQLString},
-    username: {type: GraphQLString},
-    oldPassword: {type: GraphQLString},
-    newPassword: {type: GraphQLString}
+    newUser: {
+      type: new GraphQLInputObjectType({
+        name: 'UserInput',
+        fields: {
+          name: {type: GraphQLString},
+          username: {type: GraphQLString},
+          oldPassword: {type: GraphQLString},
+          newPassword: {type: GraphQLString}
+        }
+      })
+    }
   },
-  async resolve(_: any, {id, name, username, oldPassword, newPassword}: any ) {
-    console.log(id, name, username, oldPassword);
+  async resolve(_: any, {id, newUser}: any ) {
+    console.log(id, newUser.name, newUser.username, newUser.oldPassword);
     
     const userFound = await Users.findOneBy({ id });
     // if (!userFound) throw new Error("User not found");
@@ -66,7 +73,7 @@ export const UPDATE_USER = {
     }
 
     // Compare old password with the new password
-    const isMatch = await compare(oldPassword, userFound?.password);
+    const isMatch = await compare(newUser.oldPassword, userFound?.password);
 
     // if (!isMatch) throw new Error("Passwords does not match");
     if(!isMatch) return {
@@ -74,11 +81,16 @@ export const UPDATE_USER = {
       message: "Passwords do not match"
     }
     
-    const encryptPassword = await bcryptjs.hash(newPassword, 10)
+    const encryptPassword = await bcryptjs.hash(newUser.newPassword, 10)
 
     console.log("---->   ",userFound, "  isMatch : ", isMatch);
    
-    const result = await Users.update({id}, {name, username, password: encryptPassword})
+    const result = await Users.update(
+      {id}, 
+      { name: newUser.name, 
+        username: newUser.username, 
+        password: encryptPassword}
+    )
     
     if(result.affected === 0) return false;
     
