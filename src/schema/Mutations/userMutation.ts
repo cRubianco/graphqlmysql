@@ -2,6 +2,7 @@ import { GraphQLBoolean, GraphQLID, GraphQLObjectType, GraphQLString } from "gra
 import { Users } from "../../entities/users";
 import { UserType } from "../typeDefs/userType";
 import bcryptjs, { compare } from "bcryptjs";
+import { MessageType } from "../typeDefs/messgaeType";
 
 export const CREATE_USER = {
   // type: GraphQLString,
@@ -46,7 +47,7 @@ export const DELETE_USER = {
 };
 
 export const UPDATE_USER = {
-  type: GraphQLBoolean,
+  type: MessageType,
   args: {
     id: {type: GraphQLID},
     name: {type: GraphQLString},
@@ -58,23 +59,33 @@ export const UPDATE_USER = {
     console.log(id, name, username, oldPassword);
     
     const userFound = await Users.findOneBy({ id });
-    if (!userFound) throw new Error("User not found");
+    // if (!userFound) throw new Error("User not found");
+    if(!userFound) return {
+      success: false,
+      message: "User not found"
+    }
 
     // Compare old password with the new password
     const isMatch = await compare(oldPassword, userFound?.password);
 
-    if (!isMatch) throw new Error("Passwords does not match");
+    // if (!isMatch) throw new Error("Passwords does not match");
+    if(!isMatch) return {
+      success: false,
+      message: "Passwords do not match"
+    }
     
     const encryptPassword = await bcryptjs.hash(newPassword, 10)
 
     console.log("---->   ",userFound, "  isMatch : ", isMatch);
    
-    const result = await Users.update({id}, {username, name, password: encryptPassword})
+    const result = await Users.update({id}, {name, username, password: encryptPassword})
     
     if(result.affected === 0) return false;
     
-    return true;
-
-  }
+    return {
+      success: true,
+      message: "User updated successfully",
+    }
+  },
 
 };
