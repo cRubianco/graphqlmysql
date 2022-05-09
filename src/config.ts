@@ -1,3 +1,21 @@
+/** 
+ * Para poder importar las variables de entorno
+ * 
+ * Las variables de entorno tambien se pueden importar acá
+ *  dela siguiente manera:
+ * import dotenv from "dotenv";
+ *
+ * // configurar dotenv
+ * dotenv.config();
+ * 
+ * // --------- también puedo importar solo config  -------
+ * import {config} from "dotenv";
+ * y lo ejecuto
+ * config()
+ * 
+*/
+import dotenv from "dotenv";
+dotenv.config();
 
 export const PORT = process.env.PORT || 3000;
 
